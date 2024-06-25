@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JavaScript 퀴즈 프로그램</title>
+<style>
+  /* 기본 스타일 설정 */
+  body {
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+    text-align: center;
+    margin: 20px;
+  }
+  .quiz-container {
+    max-width: 600px;
+    margin: auto;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+  }
+  h2 {
+    color: #333;
+  }
+  #quiz {
+    text-align: left;
+  }
+  .question {
+    margin-bottom: 10px;
+  }
+  .options label {
+    display: block;
+    margin-bottom: 8px;
+  }
+  button {
+    padding: 10px 20px;
+    margin-top: 10px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  button:hover {
+    background-color: #45a049;
+  }
+</style>
+</head>
+<body>
+<div class="quiz-container">
+  <h2>JavaScript 퀴즈</h2>
+  <div id="quiz">
+    <!-- 퀴즈 질문이 표시될 요소 -->
+    <div class="question" id="question"></div>
+    <!-- 퀴즈 선택지가 표시될 요소 -->
+    <div class="options" id="options"></div>
+    <!-- 다음 버튼 -->
+    <button id="submitBtn">다음</button>
+  </div>
+</div>
+
+<script>
+  // 퀴즈 데이터 배열
+  const quizData = [
+    {
+      question: "JavaScript의 창시자는 누구일까요?",
+      options: ["Brendan Eich", "John Resig", "Douglas Crockford", "Guido van Rossum"],
+      answer: "Brendan Eich"
+    },
+    {
+      question: "JavaScript의 파일 확장자는 무엇일까요?",
+      options: [".js", ".css", ".html", ".txt"],
+      answer: ".js"
+    },
+    {
+      question: "JavaScript에서 배열을 생성하는 키워드는?",
+      options: ["array()", "new Array[]", "[]", "array{}"],
+      answer: "[]"
+    }
+    // 추가 질문을 여기에 작성할 수 있습니다
+  ];
+
+  let currentQuestion = 0; // 현재 질문의 인덱스
+  let score = 0; // 점수
+
+  // DOM 요소 가져오기
+  const questionElement = document.getElementById('question');
+  const optionsElement = document.getElementById('options');
+  const submitBtn = document.getElementById('submitBtn');
+
+  // 질문 로드 함수
+  function loadQuestion() {
+    const currentQuizData = quizData[currentQuestion];
+    questionElement.innerText = currentQuizData.question;
+
+    optionsElement.innerHTML = ''; // 이전 옵션을 지움
+    currentQuizData.options.forEach(option => {
+      const optionElement = document.createElement('label');
+      optionElement.innerHTML = `<input type="radio" name="answer" value="${option}"> ${option}`;
+      optionsElement.appendChild(optionElement);
+    });
+  }
+
+  // 첫 질문 로드
+  loadQuestion();
+
+  // 제출 버튼 클릭 이벤트 리스너
+  submitBtn.addEventListener('click', () => {
+    const selectedOption = document.querySelector('input[name="answer"]:checked');
+    if (!selectedOption) {
+      alert('답을 선택해주세요!');
+      return;
+    }
+
+    const answer = selectedOption.value;
+    if (answer === quizData[currentQuestion].answer) {
+      score++; // 정답인 경우 점수 증가
+    }
+
+    currentQuestion++; // 다음 질문으로 이동
+    if (currentQuestion < quizData.length) {
+      loadQuestion(); // 다음 질문 로드
+    } else {
+      alert(`퀴즈가 종료되었습니다. 총 점수는 ${score}점 입니다.`);
+      // 퀴즈 완료 후 추가 동작을 여기에 작성할 수 있습니다 (예: 재시작 버튼 표시)
+    }
+  });
+</script>
+</body>
+</html>
