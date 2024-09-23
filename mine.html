@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>지뢰찾기</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      font-family: Arial, sans-serif;
+      background-color: #f0f0f0;
+      margin: 0;
+      padding: 20px;
+    }
+
+    h1 {
+      margin-bottom: 20px;
+    }
+
+    #game-board {
+      display: grid;
+      grid-template-columns: repeat(10, 40px);
+      grid-gap: 2px;
+    }
+
+    .cell {
+      width: 40px;
+      height: 40px;
+      background-color: #ddd;
+      border: 1px solid #aaa;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      cursor: pointer;
+    }
+
+    .cell.revealed {
+      background-color: #fff;
+      cursor: default;
+    }
+
+    .cell.mine {
+      background-color: red;
+    }
+
+    button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h1>지뢰찾기</h1>
+  <div id="game-board"></div>
+  <button id="reset-button">게임 초기화</button>
+
+  <script>
+    const boardSize = 10;
+    const mineCount = 15;
+    let board = [];
+    let revealedCount = 0;
+
+    const gameBoard = document.getElementById("game-board");
+    const resetButton = document.getElementById("reset-button");
+
+    function initializeBoard() {
+      board = [];
+      revealedCount = 0;
+      gameBoard.innerHTML = "";
+      gameBoard.style.gridTemplateColumns = `repeat(${boardSize}, 40px)`;
+
+      for (let row = 0; row < boardSize; row++) {
+        const rowArray = [];
+        for (let col = 0; col < boardSize; col++) {
+          const cell = {
+            hasMine: false,
+            revealed: false,
+            adjacentMines: 0
+          };
+          rowArray.push(cell);
+
+          const cellElement = document.createElement("div");
+          cellElement.classList.add("cell");
+          cellElement.addEventListener("click", () => revealCell(row, col));
+          gameBoard.appendChild(cellElement);
+        }
+        board.push(rowArray);
+      }
+
+      placeMines();
+      calculateAdjacentMines();
+    }
+
+    function placeMines() {
+      let minesPlaced = 0;
+      while (minesPlaced < mineCount) {
+        const row = Math.floor(Math.random() * boardSize);
+        const col = Math.floor(Math.random() * boardSize);
+
+        if (!board[row][col].hasMine) {
+          board[row][col].hasMine = true;
+          minesPlaced++;
+        }
+      }
+    }
+
+    function calculateAdjacentMines() {
+      for (let row = 0; row < boardSize; row++) {
+        for (let col = 0; col < boardSize; col++) {
+          if (!board[row][col].hasMine) {
+            let mineCount = 0;
+            for (let r = -1; r <= 1; r++) {
+              for (let c = -1; c <= 1; c++) {
+                if (isValidCell(row + r, col + c) && board[row + r][col + c].hasMine) {
+                  mineCount++;
+                }
+              }
+            }
+            board[row][col].adjacentMines = mineCount;
+          }
+        }
+      }
+    }
+
+    function isValidCell(row, col) {
+      return row >= 0 && row < boardSize && col >= 0 && col < boardSize;
+    }
+
+    function revealCell(row, col) {
+      const cell = board[row][col];
+      const cellElement = gameBoard.children[row * boardSize + col];
+
+      if (cell.revealed) return;
+
+      cell.revealed = true;
+      cellElement.classList.add("revealed");
+
+      if (cell.hasMine) {
+        cellElement.classList.add("mine");
+        alert("지뢰를 밟았습니다! 게임 오버!");
+        revealAllMines();
+      } else {
+        cellElement.textContent = cell.adjacentMines === 0 ? "" : cell.adjacentMines;
+        revealedCount++;
+
+        if (cell.adjacentMines === 0) {
+          for (let r = -1; r <= 1; r++) {
+            for (let c = -1; c <= 1; c++) {
+              if (isValidCell(row + r, col + c)) {
+                revealCell(row + r, col + c);
+              }
+            }
+          }
+        }
+
+        if (revealedCount === boardSize * boardSize - mineCount) {
+          alert("승리하셨습니다!");
+        }
+      }
+    }
+
+    function revealAllMines() {
+      for (let row = 0; row < boardSize; row++) {
+        for (let col = 0; col < boardSize; col++) {
+          if (board[row][col].hasMine) {
+            const cellElement = gameBoard.children[row * boardSize + col];
+            cellElement.classList.add("mine");
+          }
+        }
+      }
+    }
+
+    resetButton.addEventListener("click", initializeBoard);
+
+    initializeBoard();
+  </script>
+</body>
+</html>
